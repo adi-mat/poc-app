@@ -4,7 +4,9 @@ import { createClient } from "@/utils/supabase/server";
 import FetchDataSteps from "@/components/tutorial/FetchDataSteps";
 import Header from "@/components/Header";
 import { redirect } from "next/navigation";
- 
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+
 export default async function ProtectedPage() {
   const supabase = createClient();
 
@@ -27,7 +29,10 @@ export default async function ProtectedPage() {
       </div>
 
       <div className="animate-in flex-1 flex flex-col gap-20 opacity-0 max-w-4xl px-3">
-        <Header />
+        <div className="flex w-screen max-w-sm items-center space-x-2">
+          <Input type="text" placeholder="Search Invoice" />
+          <Button type="submit">Search</Button>
+        </div>
       </div>
       
       <footer>
