@@ -9,7 +9,8 @@ export default function SearchInput() {
   const [invoiceId, setInvoiceId] = useState("");
   const { handleSearchInvoice, loading, error, invoice } = useSearchInvoices();
 
-  const { data = [] } = invoice ?? [];
+  const data = invoice?.data ?? [];
+
   return (
     <div>
       <div className="flex gap-2 w-full">
@@ -22,7 +23,6 @@ export default function SearchInput() {
         <Button
           type="submit"
           onClick={() => {
-            console.log("clicked");
             handleSearchInvoice(invoiceId);
           }}
         >

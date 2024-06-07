@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 export default function useSearchInvoices() {
-  const [invoice, setInvoice] = useState(null);
+  const [invoice, setInvoice] = useState({ data: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -14,7 +14,6 @@ export default function useSearchInvoices() {
     try {
       const response = await fetch(`/v1/invoices/${invoiceId}`);
       const data = await response.json();
-      console.log(data, "data");
 
       if (response.ok) {
         setInvoice(data);
