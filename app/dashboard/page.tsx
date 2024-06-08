@@ -3,7 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import SearchInput from "@/components/SearchInput";
 
-export default async function ProtectedPage() {
+export default async function DashboardPage() {
   const supabase = createClient();
   const {
     data: { user },
@@ -23,8 +23,8 @@ export default async function ProtectedPage() {
         </nav>
       </div>
 
-      <div className="animate-in flex-1 flex flex-col gap-20 opacity-0 max-w-4xl px-3">
-        <div className="flex w-screen max-w-sm items-center space-x-2">
+      <div className="w-full flex justify-center">
+        <div className="w-1/2">
           <SearchInput />
         </div>
       </div>

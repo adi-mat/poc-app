@@ -6,6 +6,7 @@ export default function useSearchInvoices() {
   const [invoice, setInvoice] = useState({ data: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [invoiceId, setInvoiceId] = useState("");
 
   const handleSearchInvoice = async (invoiceId: string) => {
     setLoading(true);
@@ -17,6 +18,7 @@ export default function useSearchInvoices() {
 
       if (response.ok) {
         setInvoice(data);
+        setInvoiceId("");
       } else {
         setError(data.error);
       }
@@ -32,5 +34,7 @@ export default function useSearchInvoices() {
     loading,
     error,
     invoice,
+    invoiceId,
+    setInvoiceId,
   };
 }
