@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { useRouter } from "next/navigation";
+import UploadMorePdfs from "./UploadMorePdfs";
+
 interface PrevFields {
   [key: number]: {
     [key: string]: string;
@@ -15,6 +16,7 @@ interface NewFields {
     [key: string]: string;
   };
 }
+
 export default function InvoiceList({
   invoiceList,
   loading,
@@ -24,8 +26,8 @@ export default function InvoiceList({
   loading: boolean;
   error: string;
 }) {
-  const router = useRouter();
   const [newFields, setNewFields] = useState<NewFields>({});
+  const [uploadMorePdfs, setUploadMorePdfs] = useState(false);
 
   const handleInputChange = (index: number, field: string, value: string) => {
     setNewFields((prevFields: PrevFields) => ({
@@ -54,30 +56,35 @@ export default function InvoiceList({
     const additionalDetails = newFields[index] || {};
     const combinedInvoice = { ...invoice, ...additionalDetails };
     localStorage.setItem("additionalFields", JSON.stringify(combinedInvoice));
-    router.push("/pdfupload");
-    // console.log("Combined Invoice Details:", combinedInvoice);
-    // try {
-    //   const response = await fetch("v1/generate-pdf", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(combinedInvoice),
-    //   });
+    console.log("Combined Invoice Details:", combinedInvoice);
+    try {
+      const response = await fetch("v1/generate-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(combinedInvoice),
+      });
 
-    //   if (!response.ok) {
-    //     throw new Error("Network response was not ok");
-    //   }
-    //   const blob = await response.blob();
-    //   const url = window.URL.createObjectURL(blob);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
 
-    //   // Open the PDF in a new tab
-    //   window.open(url);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "invoice.pdf"; // Specify the desired file name
+      document.body.appendChild(a); // Append the link to the body
+      a.click(); // Programmatically click the link to trigger the download
+      document.body.removeChild(a); // Remove the link from the document
 
-    //   // PDF generation successful, maybe do something with response
-    // } catch (error) {
-    //   console.error("There was a problem with the fetch operation:", error);
-    // }
+      // Revoke the object URL to free up memory
+      window.URL.revokeObjectURL(url);
+      setUploadMorePdfs(true);
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    }
   };
 
   return (
@@ -171,6 +178,11 @@ export default function InvoiceList({
                     Save and Generate PDF
                   </Button>
                 </div>
+                {uploadMorePdfs && (
+                  <div className="mt-4">
+                    <UploadMorePdfs />
+                  </div>
+                )}
               </div>
             )
           )}

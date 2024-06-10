@@ -4,7 +4,7 @@ import { PDFDocument } from "pdf-lib";
 
 export async function POST(request: Request, context: any) {
   console.log("in this");
-  const res = await request.formData();
+  const res = await request.json();
   console.log(res, "res");
   // const supabase = createClient();
   // const { data, error } = await supabase("invoices").select().eq("invoice_id", context.params.invoiceId);
@@ -14,18 +14,33 @@ export async function POST(request: Request, context: any) {
   const { width, height } = page.getSize();
   const fontSize = 20;
 
-  const invoice_id = res.get("invoice_id");
-  const customer_name = res.get("customer_name");
-  const invoice_date = res.get("invoice_date");
-  const item_description = res.get("item_description");
-  const total_price = res.get("total_price");
-  const unit_price = res.get("unit_price");
-  const notes = res.get("notes");
-  const quantity = res.get("quantity");
-  const status = res.get("status");
-  const address = res.get("address");
-  const balance = res.get("balance");
-  const tax = res.get("tax");
+  const {
+    invoice_id,
+    customer_name,
+    invoice_date,
+    item_description,
+    total_price,
+    unit_price,
+    notes,
+    quantity,
+    status,
+    address,
+    balance,
+    tax,
+  } = res;
+
+  // const invoice_id = res.get("invoice_id");
+  // const customer_name = res.get("customer_name");
+  // const invoice_date = res.get("invoice_date");
+  // const item_description = res.get("item_description");
+  // const total_price = res.get("total_price");
+  // const unit_price = res.get("unit_price");
+  // const notes = res.get("notes");
+  // const quantity = res.get("quantity");
+  // const status = res.get("status");
+  // const address = res.get("address");
+  // const balance = res.get("balance");
+  // const tax = res.get("tax");
   // Add content to the PDF
   page.drawText(`Invoice ID: ${invoice_id}`, {
     x: 50,
