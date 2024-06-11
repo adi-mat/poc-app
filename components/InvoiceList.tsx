@@ -1,9 +1,65 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import UploadMorePdfs from "./UploadMorePdfs";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./ui/form";
+
+const formSchema = z.object({
+  customer_name: z.string().min(1, { message: "Customer name is required" }),
+  invoice_date: z.string().min(1, { message: "Invoice date is required" }),
+  due_date: z.string().min(1, { message: "Due date is required" }),
+  item_description: z
+    .string()
+    .min(1, { message: "Item description is required" }),
+  quantity: z.preprocess(
+    (val) => Number(val),
+    z.number().min(1, { message: "Quantity is required" })
+  ),
+  unit_price: z.preprocess(
+    (val) => Number(val),
+    z.number().min(1, { message: "Unit price is required" })
+  ),
+  total_price: z.preprocess(
+    (val) => Number(val),
+    z.number().min(1, { message: "Total price is required" })
+  ),
+  status: z.string().min(1, { message: "Status is required" }),
+  notes: z.string().optional(),
+  address: z.string().optional(),
+  balance: z.string().optional(),
+  tax: z.string().optional(),
+});
+
+const updateFormSchema = formSchema.extend({
+  invoice_id: z.number().min(1, { message: "Invoice ID is required" }),
+});
+
+interface Invoice {
+  invoice_id: number;
+  customer_name: string;
+  invoice_date: string;
+  due_date: string;
+  item_description: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  status: string;
+  notes: string;
+  address?: string;
+  balance?: string;
+  tax?: string;
+}
 
 interface PrevFields {
   [key: number]: {
@@ -22,39 +78,17 @@ export default function InvoiceList({
   loading,
   error,
 }: {
-  invoiceList: Array<object>;
+  invoiceList: Array<Invoice>;
   loading: boolean;
   error: string;
 }) {
   const [newFields, setNewFields] = useState<NewFields>({});
   const [uploadMorePdfs, setUploadMorePdfs] = useState(false);
 
-  const handleInputChange = (index: number, field: string, value: string) => {
-    setNewFields((prevFields: PrevFields) => ({
-      ...prevFields,
-      [index]: {
-        ...prevFields[index],
-        [field]: value,
-      },
-    }));
-  };
-
-  const handleSave = async (
-    invoice: {
-      invoice_id: any;
-      customer_name: any;
-      invoice_date: any;
-      item_description: any;
-      total_price: any;
-      unit_price: any;
-      notes: any;
-      quantity: any;
-      status: any;
-    },
-    index: number
-  ) => {
+  const handleSave = async (data: any, index: number) => {
+    const invoice = invoiceList[index] || {};
     const additionalDetails = newFields[index] || {};
-    const combinedInvoice = { ...invoice, ...additionalDetails };
+    const combinedInvoice = { ...invoice, ...data, ...additionalDetails };
     localStorage.setItem("additionalFields", JSON.stringify(combinedInvoice));
     console.log("Combined Invoice Details:", combinedInvoice);
     try {
@@ -87,105 +121,458 @@ export default function InvoiceList({
     }
   };
 
+  const form = useForm({
+    resolver: zodResolver(
+      invoiceList.length > 0 ? updateFormSchema : formSchema
+    ),
+    defaultValues: {
+      customer_name: "",
+      invoice_date: "",
+      due_date: "",
+      item_description: "",
+      quantity: 0,
+      unit_price: 0,
+      total_price: 0,
+      status: "",
+      notes: "",
+      address: "",
+      balance: "",
+      tax: "",
+      ...(invoiceList.length > 0 ? { invoice_id: undefined } : {}),
+    },
+  });
+
+  useEffect(() => {
+    if (invoiceList.length > 0) {
+      const firstInvoice = invoiceList[0];
+      form.reset({
+        invoice_id: firstInvoice.invoice_id as any,
+        customer_name: firstInvoice.customer_name || "",
+        invoice_date: firstInvoice.invoice_date || "",
+        due_date: firstInvoice.due_date || "",
+        item_description: firstInvoice.item_description || "",
+        quantity: firstInvoice.quantity || 0,
+        unit_price: firstInvoice.unit_price || 0,
+        total_price: firstInvoice.total_price || 0,
+        status: firstInvoice.status || "",
+        notes: firstInvoice.notes || "",
+        address: newFields[0]?.address || "",
+        balance: newFields[0]?.balance || "",
+        tax: newFields[0]?.tax || "",
+      });
+    } else {
+      form.reset({
+        customer_name: "",
+        invoice_date: "",
+        due_date: "",
+        item_description: "",
+        quantity: 0,
+        unit_price: 0,
+        total_price: 0,
+        status: "",
+        notes: "",
+        address: "",
+        balance: "",
+        tax: "",
+      });
+    }
+  }, [invoiceList, form]);
+
   return (
     <div>
       {loading && <div className="text-center text-gray-500">Loading...</div>}
       {error && <div className="text-center text-red-500">{error}</div>}
-      {invoiceList?.length > 0 && (
+      {!loading && invoiceList.length === 0 && (
+        <div className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit((data) => handleSave(data, 0))}
+              className="space-y-8"
+            >
+              <FormField
+                control={form.control}
+                name="customer_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Customer</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="invoice_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Invoice Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="due_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Due Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="item_description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Item Description</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantity</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="unit_price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unit Price</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="total_price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total Price</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="balance"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Balance</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tax"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tax</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="mb-2 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="mt-4">
+                Save and Generate PDF
+              </Button>
+            </form>
+          </Form>
+        </div>
+      )}
+      {!loading && invoiceList.length > 0 && (
         <div className="grid grid-cols-1 gap-4 mt-4">
-          {invoiceList.map(
-            (
-              {
-                invoice_id,
-                customer_name,
-                invoice_date,
-                item_description,
-                total_price,
-                unit_price,
-                notes,
-                quantity,
-                status,
-              }: any,
-              index
-            ) => (
-              <div
-                key={index}
-                className="bg-white shadow-md rounded-lg p-4 border border-gray-200"
-              >
-                <p>Invoice ID: {invoice_id}</p>
-                <p>Customer: {customer_name}</p>
-                <p>Invoice Date: {invoice_date}</p>
-                <p>Item: {item_description}</p>
-                <p>Total Price: {total_price}</p>
-                <p>Unit Price: {unit_price}</p>
-                <p>Notes: {notes}</p>
-                <p>Quantity: {quantity}</p>
-                <p>Status: {status}</p>
-                <div className="mt-4">
-                  <h4 className="text-md font-semibold mb-2">
-                    Add More Details
-                  </h4>
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    type="text"
-                    id="address"
-                    value={newFields[index]?.address || ""}
-                    onChange={(e) =>
-                      handleInputChange(index, "address", e.target.value)
-                    }
-                    className="mb-2 w-full"
+          {invoiceList.map((invoice, index) => (
+            <div
+              key={index}
+              className="bg-white shadow-md rounded-lg p-4 border border-gray-200"
+            >
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit((data) =>
+                    handleSave(
+                      {
+                        ...data,
+                        invoice_id: data.invoice_id,
+                      },
+                      index
+                    )
+                  )}
+                  className="space-y-8"
+                >
+                  <FormField
+                    control={form.control}
+                    name="invoice_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Invoice ID</FormLabel>
+                        <FormControl>
+                          <Input {...field} readOnly className="mb-2 w-full" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <Label htmlFor="balance">Balance</Label>
-                  <Input
-                    type="text"
-                    id="balance"
-                    value={newFields[index]?.balance || ""}
-                    onChange={(e) =>
-                      handleInputChange(index, "balance", e.target.value)
-                    }
-                    className="mb-2 w-full"
+                  <FormField
+                    control={form.control}
+                    name="customer_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="mb-2 w-full" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <Label htmlFor="tax">Tax</Label>
-                  <Input
-                    type="text"
-                    id="tax"
-                    value={newFields[index]?.tax || ""}
-                    onChange={(e) =>
-                      handleInputChange(index, "tax", e.target.value)
-                    }
-                    className="mb-2 w-full"
+                  <FormField
+                    control={form.control}
+                    name="invoice_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Invoice Date</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            {...field}
+                            className="mb-2 w-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <Button
-                    type="button"
-                    onClick={() =>
-                      handleSave(
-                        {
-                          invoice_id,
-                          customer_name,
-                          invoice_date,
-                          item_description,
-                          total_price,
-                          unit_price,
-                          notes,
-                          quantity,
-                          status,
-                        },
-                        index
-                      )
-                    }
-                    className="mt-4"
-                  >
+                  <FormField
+                    control={form.control}
+                    name="due_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Due Date</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            {...field}
+                            className="mb-2 w-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="item_description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Item Description</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="mb-2 w-full" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="quantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quantity</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            className="mb-2 w-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="unit_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Unit Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            className="mb-2 w-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="total_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Total Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            className="mb-2 w-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="mb-2 w-full" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notes</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="mb-2 w-full" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="mb-2 w-full" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="balance"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Balance</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="mb-2 w-full" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="tax"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tax</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="mb-2 w-full" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="mt-4">
                     Save and Generate PDF
                   </Button>
+                </form>
+              </Form>
+              {uploadMorePdfs && (
+                <div className="mt-4">
+                  <UploadMorePdfs />
                 </div>
-                {uploadMorePdfs && (
-                  <div className="mt-4">
-                    <UploadMorePdfs />
-                  </div>
-                )}
-              </div>
-            )
-          )}
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

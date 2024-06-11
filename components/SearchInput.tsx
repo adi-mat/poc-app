@@ -14,6 +14,7 @@ export default function SearchInput() {
     invoice,
     invoiceId,
     setInvoiceId,
+    searchExecuted,
   } = useSearchInvoices();
 
   const data = invoice?.data ?? [];
@@ -36,7 +37,9 @@ export default function SearchInput() {
           Search
         </Button>
       </div>
-      <InvoiceList loading={loading} error={error ?? ""} invoiceList={data} />
+      {searchExecuted && (
+        <InvoiceList loading={loading} error={error ?? ""} invoiceList={data} />
+      )}
     </div>
   );
 }

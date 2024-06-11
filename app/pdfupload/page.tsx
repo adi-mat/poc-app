@@ -100,7 +100,7 @@ export default function SecondPage() {
         className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         disabled={uploadedFiles.length === 0}
       >
-        Merge and Save PDF
+        Merge and Save PDFs
       </Button>
     </div>
   );
