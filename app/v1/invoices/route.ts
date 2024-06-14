@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 
 interface Invoice {
+  id?: any;
   invoice_id?: number;
   legacy_invoice_id?: number;
   customer_name: string;

@@ -17,7 +17,7 @@ const DOCUSIGN_ACCOUNT_ID = process.env.DOCUSIGN_ACCOUNT_ID;
 const DOCUSIGN_SIGNER_EMAIL = process.env.DOCUSIGN_SIGNER_EMAIL;
 const DOCUSIGN_SIGNER_NAME = process.env.DOCUSIGN_SIGNER_NAME;
 
-export async function sendToDocuSign(pdfBytes) {
+export async function sendToDocuSign(pdfBytes: Buffer) {
   const apiClient = new ApiClient();
   apiClient.setBasePath(`${DOCUSIGN_API_BASE_PATH}`);
   apiClient.addDefaultHeader(
@@ -63,7 +63,7 @@ export async function sendToDocuSign(pdfBytes) {
       envelopeDefinition: envDef,
     });
     return results;
-  } catch (error) {
+  } catch (error: any) {
     console.error(
       "Error sending document to DocuSign:",
       error.response?.data || error
