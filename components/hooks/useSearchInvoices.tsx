@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 export default function useSearchInvoices() {
-  const [invoice, setInvoice] = useState({ data: [] });
+  const [invoice, setInvoice] = useState({ invoice: null, source: "new" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [invoiceId, setInvoiceId] = useState("");

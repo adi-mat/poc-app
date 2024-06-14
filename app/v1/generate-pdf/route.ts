@@ -29,19 +29,6 @@ export async function POST(request: Request, context: any) {
     tax,
   } = res;
 
-  // const invoice_id = res.get("invoice_id");
-  // const customer_name = res.get("customer_name");
-  // const invoice_date = res.get("invoice_date");
-  // const item_description = res.get("item_description");
-  // const total_price = res.get("total_price");
-  // const unit_price = res.get("unit_price");
-  // const notes = res.get("notes");
-  // const quantity = res.get("quantity");
-  // const status = res.get("status");
-  // const address = res.get("address");
-  // const balance = res.get("balance");
-  // const tax = res.get("tax");
-  // Add content to the PDF
   page.drawText(`Invoice ID: ${invoice_id}`, {
     x: 50,
     y: height - 50,
