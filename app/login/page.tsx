@@ -36,6 +36,12 @@ export default function Login({
     const password = formData.get("password") as string;
     const supabase = createClient();
 
+    if (password.length < 6) {
+      return redirect(
+        `/login?message=Password must be at least 6 characters long`
+      );
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -43,7 +49,6 @@ export default function Login({
         emailRedirectTo: `${origin}/auth/callback`,
       },
     });
-    console.log(error, "error");
     if (error) {
       return redirect("/login?message=Could not authenticate user");
     }

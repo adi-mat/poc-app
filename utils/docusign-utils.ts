@@ -8,6 +8,7 @@ const {
   Tabs,
   Recipients,
 } = require("docusign-esign");
+const { PDFDocument } = require("pdf-lib");
 
 const DOCUSIGN_INTEGRATOR_KEY = process.env.DOCUSIGN_INTEGRATOR_KEY;
 const DOCUSIGN_USER_ID = process.env.DOCUSIGN_USER_ID;
@@ -17,13 +18,17 @@ const DOCUSIGN_ACCOUNT_ID = process.env.DOCUSIGN_ACCOUNT_ID;
 const DOCUSIGN_SIGNER_EMAIL = process.env.DOCUSIGN_SIGNER_EMAIL;
 const DOCUSIGN_SIGNER_NAME = process.env.DOCUSIGN_SIGNER_NAME;
 
-export async function sendToDocuSign(pdfBytes: Buffer) {
+export async function sendToDocuSign(pdfBytes: Buffer, email: string) {
   const apiClient = new ApiClient();
   apiClient.setBasePath(`${DOCUSIGN_API_BASE_PATH}`);
   apiClient.addDefaultHeader(
     "Authorization",
     "Bearer " + (await getAccessToken())
   );
+
+  // Parse the PDF to get the number of pages
+  const pdfDoc = await PDFDocument.load(pdfBytes);
+  const totalPages = pdfDoc.getPageCount();
 
   const envDef = new EnvelopeDefinition();
   envDef.emailSubject = "Please sign this document";
@@ -38,20 +43,25 @@ export async function sendToDocuSign(pdfBytes: Buffer) {
   envDef.documents = [doc];
 
   const signer = new Signer();
-  signer.email = DOCUSIGN_SIGNER_EMAIL;
+  signer.email = email;
   signer.name = DOCUSIGN_SIGNER_NAME;
   signer.recipientId = "1";
 
-  const signHere = new SignHere();
-  signHere.documentId = "1";
-  signHere.pageNumber = "1";
-  signHere.recipientId = "1";
-  signHere.tabLabel = "SignHereTab";
-  signHere.xPosition = "100";
-  signHere.yPosition = "100";
+  // Create SignHere tabs for each page
+  const signHereTabs = [];
+  for (let i = 1; i <= totalPages; i++) {
+    const signHere = new SignHere();
+    signHere.documentId = "1";
+    signHere.pageNumber = i.toString();
+    signHere.recipientId = "1";
+    signHere.tabLabel = "SignHereTab";
+    signHere.xPosition = "100"; // Customize the position as needed
+    signHere.yPosition = "700"; // Customize the position as needed
+    signHereTabs.push(signHere);
+  }
 
   const tabs = new Tabs();
-  tabs.signHereTabs = [signHere];
+  tabs.signHereTabs = signHereTabs;
   signer.tabs = tabs;
 
   envDef.recipients = new Recipients();

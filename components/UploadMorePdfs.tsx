@@ -49,12 +49,13 @@ export default function UploadMorePdfs({
 
       const result = await response.json();
       setDocuSignResponse(result.docuSignResponse);
+      console.log(docuSignResponse, "docuSignResponse");
 
       // Optionally, open the DocuSign envelope in a new tab
-      window.open(
-        `${DOCUSIGN_API_BASE_PATH}${result.docuSignResponse.uri}`,
-        "_blank"
-      );
+      // window.open(
+      //   `${DOCUSIGN_API_BASE_PATH}${result.docuSignResponse.uri}`,
+      //   "_blank"
+      // );
     } catch (error) {
       console.error("There was a problem with the fetch operation:", error);
     }
@@ -110,14 +111,14 @@ export default function UploadMorePdfs({
           <p>
             <strong>Status Date Time:</strong> {docuSignResponse.statusDateTime}
           </p>
-          <a
+          {/* <a
             href={`${DOCUSIGN_API_BASE_PATH}${docuSignResponse.uri}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-800"
           >
             View Envelope
-          </a>
+          </a> */}
         </div>
       )}
     </div>
