@@ -3,8 +3,10 @@
 import { useState, useRef } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { LoadingSpinner } from "./ui/LoadingSpinner";
 
 const DOCUSIGN_API_BASE_PATH = "https://demo.docusign.net/restapi";
+
 export default function UploadMorePdfs({
   combinedInvoice,
 }: {
@@ -12,6 +14,7 @@ export default function UploadMorePdfs({
 }) {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [docuSignResponse, setDocuSignResponse] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,6 +33,7 @@ export default function UploadMorePdfs({
   };
 
   const handleMerge = async () => {
+    setLoading(true);
     const formData = new FormData();
     formData.append("invoiceDetails", JSON.stringify(combinedInvoice));
 
@@ -58,6 +62,8 @@ export default function UploadMorePdfs({
       // );
     } catch (error) {
       console.error("There was a problem with the fetch operation:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,9 +101,9 @@ export default function UploadMorePdfs({
       <Button
         onClick={handleMerge}
         className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        disabled={uploadedFiles.length === 0}
+        disabled={uploadedFiles.length === 0 || loading}
       >
-        Merge and Save PDF
+        {loading ? <LoadingSpinner color={"#ffffff"} /> : "Merge and Save PDF"}
       </Button>
       {docuSignResponse && (
         <div className="mt-4 p-4 bg-green-100 text-green-700 rounded">
