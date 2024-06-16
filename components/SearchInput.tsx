@@ -52,7 +52,7 @@ export default function SearchInput() {
       <div className="flex gap-2 w-full">
         <Input
           type="text"
-          placeholder="Search Invoice"
+          placeholder="Enter an invoice ID between 1 and 10"
           onChange={(e) => setInvoiceId(e.target.value)}
           value={invoiceId}
         />
