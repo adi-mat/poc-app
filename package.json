@@ -15,6 +15,7 @@
     "autoprefixer": "10.4.17",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
     "docusign-esign": "^7.0.2",
     "geist": "^1.2.1",
     "lucide-react": "^0.387.0",
@@ -28,13 +29,15 @@
     "tailwindcss": "3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.3.3",
+    "uuid": "^10.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/docusign-esign": "^5.19.6",
-    "@types/node": "20.11.5", 
+    "@types/node": "20.11.5",
     "@types/react": "18.2.48",
     "@types/react-dom": "18.2.18",
+    "@types/uuid": "^9.0.8",
     "encoding": "^0.1.13"
   }
 }

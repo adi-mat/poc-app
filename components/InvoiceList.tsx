@@ -112,11 +112,16 @@ export default function InvoiceList({
     }
 
     localStorage.setItem("additionalFields", JSON.stringify(combinedInvoice));
-    console.log("Combined Invoice Details:", combinedInvoice);
     setCombinedInvoice(combinedInvoice);
 
     try {
-      await onSave(combinedInvoice, source, index);
+      const result: any = await onSave(combinedInvoice, source, index);
+
+      if (source === "new" && result.invoice && result.invoice.id) {
+        combinedInvoice.id = result.invoice.id;
+        setCombinedInvoice(combinedInvoice);
+      }
+
       const response = await fetch("v1/generate-pdf", {
         method: "POST",
         headers: {
@@ -141,7 +146,6 @@ export default function InvoiceList({
 
       // Revoke the object URL to free up memory
       window.URL.revokeObjectURL(url);
-      setUploadMorePdfs(true);
       setUploadMorePdfs(true);
     } catch (error) {
       console.error("There was a problem with the save operation:", error);

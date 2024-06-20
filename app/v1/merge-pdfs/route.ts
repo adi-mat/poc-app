@@ -18,18 +18,16 @@ export async function POST(request: Request) {
 
   try {
     // Merging the PDFs
-    const mergedPdfBytes = await mergePdfs(fileBlobs, invoiceDetails);
-
+    const mergedPdfBytes = await mergePdfs(fileBlobs, null);
     // Send the merged PDF to DocuSign for signature
     const docuSignResponse = await sendToDocuSign(
-      mergedPdfBytes as Buffer,
-      user?.email as string
+      invoiceDetails,
+      user?.email as string,
+      mergedPdfBytes as Buffer
     );
-    // console.log(docuSignResponse, "docuSignResponse");
 
     return NextResponse.json({ docuSignResponse });
   } catch (error: any) {
-    //console.log(error, "error");
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

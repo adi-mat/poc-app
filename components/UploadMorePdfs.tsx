@@ -53,13 +53,6 @@ export default function UploadMorePdfs({
 
       const result = await response.json();
       setDocuSignResponse(result.docuSignResponse);
-      console.log(docuSignResponse, "docuSignResponse");
-
-      // Optionally, open the DocuSign envelope in a new tab
-      // window.open(
-      //   `${DOCUSIGN_API_BASE_PATH}${result.docuSignResponse.uri}`,
-      //   "_blank"
-      // );
     } catch (error) {
       console.error("There was a problem with the fetch operation:", error);
     } finally {
@@ -103,7 +96,11 @@ export default function UploadMorePdfs({
         className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         disabled={uploadedFiles.length === 0 || loading}
       >
-        {loading ? <LoadingSpinner color={"#ffffff"} /> : "Merge and Save PDF"}
+        {loading ? (
+          <LoadingSpinner color={"#ffffff"} />
+        ) : (
+          "Merge PDFs and send to docusign"
+        )}
       </Button>
       {docuSignResponse && (
         <div className="mt-4 p-4 bg-green-100 text-green-700 rounded">

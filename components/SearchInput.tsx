@@ -39,6 +39,7 @@ export default function SearchInput() {
       if (response.ok) {
         alert("Invoice saved successfully");
         setSaveError(null); // Clear any previous errors
+        return result;
       } else {
         setSaveError(result.error);
       }

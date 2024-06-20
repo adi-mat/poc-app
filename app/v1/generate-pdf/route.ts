@@ -1,21 +1,15 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
 import { PDFDocument } from "pdf-lib";
 
 export async function POST(request: Request, context: any) {
-  console.log("in this");
   const res = await request.json();
-  console.log(res, "res");
-  // const supabase = createClient();
-  // const { data, error } = await supabase("invoices").select().eq("invoice_id", context.params.invoiceId);
-  // request.body = JSON.stringify(data);
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage();
   const { width, height } = page.getSize();
   const fontSize = 20;
 
   const {
-    invoice_id,
+    id,
     customer_name,
     invoice_date,
     item_description,
@@ -29,7 +23,7 @@ export async function POST(request: Request, context: any) {
     tax,
   } = res;
 
-  page.drawText(`Invoice ID: ${invoice_id}`, {
+  page.drawText(`Invoice ID: ${id}`, {
     x: 50,
     y: height - 50,
     size: fontSize,

@@ -54,7 +54,6 @@ export default function SecondPage() {
       })
       .then((data) => {
         // Handle response, e.g., show a success message
-        console.log("Merged PDF saved successfully:", data);
         // Navigate to a success page or do any other action
         // router.push("/success");
       })

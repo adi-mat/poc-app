@@ -28,7 +28,7 @@ export async function mergePdfs(
     });
 
     const {
-      invoice_id,
+      id,
       customer_name,
       invoice_date,
       due_date,
@@ -44,7 +44,7 @@ export async function mergePdfs(
     } = invoiceDetails;
 
     const details = `
-      Invoice ID: ${invoice_id}
+      Invoice ID: ${id}
       Customer Name: ${customer_name}
       Invoice Date: ${invoice_date}
       Due Date: ${due_date}
@@ -81,5 +81,6 @@ export async function mergePdfs(
   }
 
   const mergedPdfBytes = await mergedPdf.save();
+
   return mergedPdfBytes;
 }

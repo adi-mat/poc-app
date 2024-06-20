@@ -2,85 +2,26 @@ const {
   ApiClient,
   EnvelopesApi,
   EnvelopeDefinition,
-  Document,
-  Signer,
-  SignHere,
+  TemplateRole,
+  Text,
   Tabs,
+  Document,
+  SignHere,
+  Signer,
   Recipients,
+  CompositeTemplate,
+  ServerTemplate,
+  InlineTemplate,
 } = require("docusign-esign");
 const { PDFDocument } = require("pdf-lib");
 
 const DOCUSIGN_INTEGRATOR_KEY = process.env.DOCUSIGN_INTEGRATOR_KEY;
 const DOCUSIGN_USER_ID = process.env.DOCUSIGN_USER_ID;
-const DOCUSIGN_API_BASE_PATH = process.env.DOCUSIGN_API_BASE_PATH; // Ensure this is correct
+const DOCUSIGN_API_BASE_PATH = process.env.DOCUSIGN_API_BASE_PATH;
 const DOCUSIGN_PRIVATE_KEY = process.env.DOCUSIGN_PRIVATE_KEY;
 const DOCUSIGN_ACCOUNT_ID = process.env.DOCUSIGN_ACCOUNT_ID;
-const DOCUSIGN_SIGNER_EMAIL = process.env.DOCUSIGN_SIGNER_EMAIL;
+const DOCUSIGN_TEMPLATE_ID = process.env.DOCUSIGN_TEMPLATE_ID;
 const DOCUSIGN_SIGNER_NAME = process.env.DOCUSIGN_SIGNER_NAME;
-
-export async function sendToDocuSign(pdfBytes: Buffer, email: string) {
-  const apiClient = new ApiClient();
-  apiClient.setBasePath(`${DOCUSIGN_API_BASE_PATH}`);
-  apiClient.addDefaultHeader(
-    "Authorization",
-    "Bearer " + (await getAccessToken())
-  );
-
-  // Parse the PDF to get the number of pages
-  const pdfDoc = await PDFDocument.load(pdfBytes);
-  const totalPages = pdfDoc.getPageCount();
-
-  const envDef = new EnvelopeDefinition();
-  envDef.emailSubject = "Please sign this document";
-  envDef.status = "sent";
-
-  const doc = new Document();
-  doc.documentBase64 = Buffer.from(pdfBytes).toString("base64");
-  doc.name = "Merged Invoice";
-  doc.fileExtension = "pdf";
-  doc.documentId = "1";
-
-  envDef.documents = [doc];
-
-  const signer = new Signer();
-  signer.email = email;
-  signer.name = DOCUSIGN_SIGNER_NAME;
-  signer.recipientId = "1";
-
-  // Create SignHere tabs for each page
-  const signHereTabs = [];
-  for (let i = 1; i <= totalPages; i++) {
-    const signHere = new SignHere();
-    signHere.documentId = "1";
-    signHere.pageNumber = i.toString();
-    signHere.recipientId = "1";
-    signHere.tabLabel = "SignHereTab";
-    signHere.xPosition = "100"; // Customize the position as needed
-    signHere.yPosition = "700"; // Customize the position as needed
-    signHereTabs.push(signHere);
-  }
-
-  const tabs = new Tabs();
-  tabs.signHereTabs = signHereTabs;
-  signer.tabs = tabs;
-
-  envDef.recipients = new Recipients();
-  envDef.recipients.signers = [signer];
-
-  const envelopesApi = new EnvelopesApi(apiClient);
-  try {
-    const results = await envelopesApi.createEnvelope(DOCUSIGN_ACCOUNT_ID, {
-      envelopeDefinition: envDef,
-    });
-    return results;
-  } catch (error: any) {
-    console.error(
-      "Error sending document to DocuSign:",
-      error.response?.data || error
-    );
-    throw error;
-  }
-}
 
 async function getAccessToken() {
   const privateKey = DOCUSIGN_PRIVATE_KEY;
@@ -98,4 +39,119 @@ async function getAccessToken() {
   return results.body.access_token;
 }
 
-export { getAccessToken };
+export async function sendToDocuSign(
+  invoiceDetails: any,
+  email: string,
+  additionalPdfBytes: Buffer
+) {
+  const apiClient = new ApiClient();
+  apiClient.setBasePath(DOCUSIGN_API_BASE_PATH);
+  apiClient.addDefaultHeader(
+    "Authorization",
+    "Bearer " + (await getAccessToken())
+  );
+
+  const envelopesApi = new EnvelopesApi(apiClient);
+
+  // Define the server template
+  const serverTemplate = ServerTemplate.constructFromObject({
+    sequence: "1",
+    templateId: DOCUSIGN_TEMPLATE_ID,
+  });
+
+  // Load the additional PDF to get the page count
+  const pdfDoc = await PDFDocument.load(additionalPdfBytes);
+  const totalPages = pdfDoc.getPageCount();
+
+  // Define the second document (dynamically generated document)
+  const documentBase64 = Buffer.from(additionalPdfBytes).toString("base64");
+  const document = Document.constructFromObject({
+    documentBase64,
+    name: "Additional Document",
+    fileExtension: "pdf",
+    documentId: "2",
+  });
+
+  const signer = Signer.constructFromObject({
+    email,
+    name: DOCUSIGN_SIGNER_NAME,
+    recipientId: "1",
+    roleName: "Signer",
+  });
+
+  const textTabs = [];
+  for (const [key, value] of Object.entries(invoiceDetails)) {
+    const textField = Text.constructFromObject({
+      tabLabel: key,
+      value: (value as any).toString(),
+    });
+    textTabs.push(textField);
+  }
+
+  const tabs = Tabs.constructFromObject({ textTabs });
+
+  // Add SignHere tabs for each page of the additional PDF
+  const signHereTabs = [];
+  for (let i = 1; i <= totalPages; i++) {
+    signHereTabs.push(
+      SignHere.constructFromObject({
+        documentId: "2",
+        pageNumber: i.toString(),
+        recipientId: "1",
+        tabLabel: `SignHereTab_${i}`,
+        xPosition: "100", // Customize the position as needed
+        yPosition: "700", // Customize the position as needed
+      })
+    );
+  }
+
+  tabs.signHereTabs = signHereTabs;
+  signer.tabs = tabs;
+
+  const recipients = Recipients.constructFromObject({ signers: [signer] });
+
+  // Define the inline template for the additional document
+  const inlineTemplateForAdditionalDoc = InlineTemplate.constructFromObject({
+    sequence: "2",
+    recipients,
+    documents: [document],
+  });
+
+  // Define the inline template for the predefined template
+  const inlineTemplateForServerTemplate = InlineTemplate.constructFromObject({
+    sequence: "1",
+    recipients,
+  });
+
+  const compositeTemplate1 = CompositeTemplate.constructFromObject({
+    compositeTemplateId: "1",
+    serverTemplates: [serverTemplate],
+    inlineTemplates: [inlineTemplateForServerTemplate],
+  });
+
+  const compositeTemplate2 = CompositeTemplate.constructFromObject({
+    compositeTemplateId: "2",
+    inlineTemplates: [inlineTemplateForAdditionalDoc],
+  });
+
+  const envDef = EnvelopeDefinition.constructFromObject({
+    emailSubject: "Please sign this document",
+    status: "sent",
+    compositeTemplates: [compositeTemplate1, compositeTemplate2],
+  });
+
+  try {
+    const envelopeSummary = await envelopesApi.createEnvelope(
+      DOCUSIGN_ACCOUNT_ID,
+      { envelopeDefinition: envDef }
+    );
+
+    return envelopeSummary;
+  } catch (error: any) {
+    console.error(
+      "Error sending document to DocuSign:",
+      error.response?.data || error
+    );
+    throw error;
+  }
+}
