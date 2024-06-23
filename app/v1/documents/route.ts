@@ -8,7 +8,10 @@ const DOCUSIGN_PRIVATE_KEY = process.env.DOCUSIGN_PRIVATE_KEY;
 const DOCUSIGN_ACCOUNT_ID = process.env.DOCUSIGN_ACCOUNT_ID;
 
 async function getAccessToken() {
-  const privateKey = DOCUSIGN_PRIVATE_KEY;
+  let privateKey = DOCUSIGN_PRIVATE_KEY!;
+  if (privateKey.includes("\\n")) {
+    privateKey = privateKey.replace(/\\n/g, "\n");
+  }
   const apiClient = new ApiClient();
   apiClient.setOAuthBasePath("account-d.docusign.com");
 
