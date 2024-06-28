@@ -38,7 +38,7 @@ export async function GET() {
 
   try {
     const results = await envelopesApi.listStatusChanges(DOCUSIGN_ACCOUNT_ID, {
-      fromDate: "2023-01-01", // Adjust the date as needed
+      fromDate: "2024-06-26", // Adjust the date as needed
     });
 
     return NextResponse.json({ envelopes: results.envelopes });
