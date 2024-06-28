@@ -13,7 +13,6 @@ export default function UploadMorePdfs({
   combinedInvoice: any;
 }) {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [docuSignResponse, setDocuSignResponse] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -47,13 +46,21 @@ export default function UploadMorePdfs({
         body: formData,
       });
 
+      console.log(response, "response");
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
 
       const result = await response.json();
-      setDocuSignResponse(result.docuSignResponse);
+
+      if (result.signingUrl) {
+        window.location.href = result.signingUrl; // Redirect to the signing URL
+      } else {
+        console.error("Error:", result.error);
+      }
     } catch (error) {
+      console.log("indulo");
       console.error("There was a problem with the fetch operation:", error);
     } finally {
       setLoading(false);
@@ -102,28 +109,6 @@ export default function UploadMorePdfs({
           "Merge PDFs and send to docusign"
         )}
       </Button>
-      {docuSignResponse && (
-        <div className="mt-4 p-4 bg-green-100 text-green-700 rounded">
-          <h3 className="text-lg font-semibold">DocuSign Envelope Sent</h3>
-          <p>
-            <strong>Envelope ID:</strong> {docuSignResponse.envelopeId}
-          </p>
-          <p>
-            <strong>Status:</strong> {docuSignResponse.status}
-          </p>
-          <p>
-            <strong>Status Date Time:</strong> {docuSignResponse.statusDateTime}
-          </p>
-          {/* <a
-            href={`${DOCUSIGN_API_BASE_PATH}${docuSignResponse.uri}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800"
-          >
-            View Envelope
-          </a> */}
-        </div>
-      )}
     </div>
   );
 }

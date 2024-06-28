@@ -77,6 +77,7 @@ export async function sendToDocuSign(
     name: DOCUSIGN_SIGNER_NAME,
     recipientId: "1",
     roleName: "Signer",
+    clientUserId: "1000", // Unique identifier for embedded signing
   });
 
   const textTabs = [];
@@ -146,7 +147,7 @@ export async function sendToDocuSign(
       { envelopeDefinition: envDef }
     );
 
-    return envelopeSummary;
+    return envelopeSummary.envelopeId;
   } catch (error: any) {
     console.error(
       "Error sending document to DocuSign:",
