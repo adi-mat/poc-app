@@ -40,7 +40,7 @@ async function getEmbeddedSigningUrl(
   const envelopesApi = new EnvelopesApi(apiClient);
 
   const viewRequest = {
-    returnUrl: "http://localhost:3000/mydocuments", // URL to redirect after signing
+    returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/payment?${envelopeId}`, // URL to redirect after signing
     authenticationMethod: "none",
     email: recipientEmail,
     userName: DOCUSIGN_SIGNER_NAME,
