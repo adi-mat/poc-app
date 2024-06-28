@@ -14,7 +14,7 @@ export default function MyDocuments() {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const response = await fetch("/v1/documents");
+        const response = await fetch("/v1/documents", { cache: "no-store" });
         if (!response.ok) {
           throw new Error("Failed to fetch documents");
         }
