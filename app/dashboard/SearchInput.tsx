@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import useSearchInvoices from "./hooks/useSearchInvoices";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import useSearchInvoices from "../../components/hooks/useSearchInvoices";
 import InvoiceList from "./InvoiceList";
 
 export default function SearchInput() {

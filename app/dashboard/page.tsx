@@ -1,7 +1,7 @@
 import AuthButton from "@/components/AuthButton";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import SearchInput from "@/components/SearchInput";
+import SearchInput from "@/app/dashboard/SearchInput";
 
 export default async function DashboardPage() {
   const supabase = createClient();

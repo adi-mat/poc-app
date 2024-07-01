@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
-const DOCUSIGN_API_BASE_PATH = process.env.NEXT_PUBLIC_DOCUSIGN_API_BASE_PATH; // Update this line to match your env setup
-
 export default function MyDocuments() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,9 +16,6 @@ export default function MyDocuments() {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            cache: "no-store",
-            pragma: "no-cache",
-            cacheControl: "no-cache",
           },
         });
         if (!response.ok) {

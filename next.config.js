@@ -2,8 +2,13 @@
 const nextConfig = {};
 
 module.exports = {
-    ...nextConfig,
-    experimental: {
-      serverComponentsExternalPackages: ['docusign-esign'],
+  ...nextConfig,
+  experimental: {
+    serverComponentsExternalPackages: ["docusign-esign"],
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
     },
-}
+  },
+};
