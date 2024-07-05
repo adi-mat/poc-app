@@ -1,6 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-
+import { redirect } from "next/navigation";
 export const updateSession = async (request: NextRequest) => {
   try {
     let response = NextResponse.next({
@@ -59,9 +59,33 @@ export const updateSession = async (request: NextRequest) => {
 
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
-    await supabase.auth.getUser();
 
-    return response;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { data, error } = await supabase
+      .from("user_profile")
+      .select("registration_complete")
+      .eq("id", user?.id)
+      .single();
+
+    // Define protected routes
+    const protectedRoutes = ["/dashboard", "/mydocuments", "/payment"];
+    if (
+      protectedRoutes.some((route) =>
+        request.nextUrl.pathname.startsWith(route)
+      )
+    ) {
+      // If no user is logged in, redirect to the login page
+      if (!user) {
+        return NextResponse.redirect(new URL("/login", request.url));
+      } else if (user && !data?.registration_complete) {
+        return NextResponse.redirect(new URL("/register", request.url));
+      }
+
+      return response;
+    }
   } catch (e) {
     // If you are here, a Supabase client could not be created!
     // This is likely because you have not set up environment variables.

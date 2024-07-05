@@ -13,6 +13,16 @@ export default async function DashboardPage() {
     return redirect("/login");
   }
 
+  const { data, error } = await supabase
+    .from("user_profile")
+    .select("registration_complete")
+    .eq("id", user.id)
+    .single();
+
+  if (!data?.registration_complete) {
+    return redirect("/register");
+  }
+
   return (
     <div className="flex-1 w-full flex flex-col items-center gap-4">
       <div className="w-full">
