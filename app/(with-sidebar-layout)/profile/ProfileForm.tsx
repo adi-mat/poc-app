@@ -27,7 +27,7 @@ const formSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
-export default function Profile({ profile }) {
+export default function Profile({ profile }: any) {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -66,7 +66,6 @@ export default function Profile({ profile }) {
       console.error("Failed to save data", error);
       toast({
         description: "Failed to update profile.",
-        status: "error",
       });
     } finally {
       setProfileUpdateLoading(false);
