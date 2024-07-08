@@ -13,6 +13,8 @@ export default async function Register() {
     redirect("/login");
   }
 
+  console.log(user, "user");
+
   const { data, error } = await supabase
     .from("user_profile")
     .select("registration_complete")

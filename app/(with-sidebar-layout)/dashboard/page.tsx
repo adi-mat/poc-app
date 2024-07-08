@@ -1,7 +1,6 @@
-import AuthButton from "@/components/AuthButton";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import SearchInput from "@/app/dashboard/SearchInput";
+import SearchInput from "@/app/(with-sidebar-layout)/dashboard/SearchInput";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -19,22 +18,15 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
+  console.log(data, "reg complete");
   if (!data?.registration_complete) {
     return redirect("/register");
   }
 
   return (
     <div className="flex-1 w-full flex flex-col items-center gap-4">
-      <div className="w-full">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-4xl flex justify-end items-center p-3 text-sm">
-            <AuthButton />
-          </div>
-        </nav>
-      </div>
-
-      <div className="w-full flex justify-center">
-        <div className="w-1/2">
+      <div className="w-full flex justify-center mt-4">
+        <div className="w-full">
           <SearchInput />
         </div>
       </div>

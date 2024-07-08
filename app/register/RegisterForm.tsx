@@ -4,6 +4,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
+import { useState } from "react";
 import {
   Form,
   FormControl,
@@ -21,6 +24,8 @@ const formSchema = z.object({
 });
 
 export default function RegisterForm() {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,11 +36,17 @@ export default function RegisterForm() {
   });
 
   const handleSave = async (values: z.infer<typeof formSchema>) => {
+    setLoading(true);
     try {
       const result = await registerUser(values);
+      toast({
+        description: "Registration successful!",
+      });
       console.log(result, "Saved data");
     } catch (error) {
       console.error(error, "Failed to save data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -110,7 +121,7 @@ export default function RegisterForm() {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            Confirm
+            {loading ? <LoadingSpinner /> : "Confirm"}
           </Button>
         </form>
       </Form>

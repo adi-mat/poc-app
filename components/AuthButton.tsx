@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
-import Link from "next/link";
+import { LogOut } from "@geist-ui/icons";
 import { redirect } from "next/navigation";
+import { NavItem } from "../app/nav-item";
 
 export default async function AuthButton() {
   const supabase = createClient();
@@ -9,29 +10,27 @@ export default async function AuthButton() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const signOut = async () => {
+  async function signOut() {
     "use server";
 
     const supabase = createClient();
     await supabase.auth.signOut();
-    return redirect("/login");
-  };
+    redirect("/login");
+  }
 
   return user ? (
-    <div className="flex items-center gap-4">
-      Hey, {user.email}!
+    <div className="flex items-center gap-4 mb-10">
       <form action={signOut}>
-        <button className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover">
+        <button
+          type="submit"
+          className="flex items-center gap-3 px-3 py-2 text-gray-900 transition-all  rounded-lg hover:text-gray-900 dark:text-gray-50 dark:bg-gray-800 dark:hover:text-gray-50"
+        >
+          <LogOut />
           Logout
         </button>
       </form>
     </div>
   ) : (
-    <Link
-      href="/login"
-      className="py-2 px-3 flex rounded-md no-underline bg-btn-background hover:bg-btn-background-hover"
-    >
-      Login
-    </Link>
+    <NavItem href="/login">Login</NavItem>
   );
 }

@@ -20,14 +20,24 @@ export const registerUser = async (data: RegisterUserType) => {
     redirect("/login");
   }
 
+  let shouldRedirect = false;
+
   try {
     const { data, error } = await supabase
       .from("user_profile")
       .update({ mobileNumber, fullName, address, registration_complete: true })
-      .eq("id", user?.id);
+      .eq("id", user.id);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    shouldRedirect = true;
   } catch (error: any) {
     throw new Error(error.message);
-  } finally {
+  }
+
+  if (shouldRedirect) {
     redirect("/dashboard");
   }
 };

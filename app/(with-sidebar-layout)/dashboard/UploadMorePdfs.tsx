@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { LoadingSpinner } from "../../components/ui/LoadingSpinner";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
 
 const DOCUSIGN_API_BASE_PATH = "https://demo.docusign.net/restapi";
 

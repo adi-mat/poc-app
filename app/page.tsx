@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import Visualizer from "next-route-visualizer";
 
 import { redirect } from "next/navigation";
 

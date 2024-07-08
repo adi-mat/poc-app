@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import UploadMorePdfs from "./UploadMorePdfs";
 import {
   Form,
@@ -13,7 +13,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../components/ui/form";
+} from "../../../components/ui/form";
 
 const formSchema = z.object({
   customer_name: z.string().min(1, { message: "Customer name is required" }),
