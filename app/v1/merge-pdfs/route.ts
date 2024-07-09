@@ -3,7 +3,9 @@ import { mergePdfs } from "@/utils/pdf-utils";
 import { sendToDocuSign } from "@/utils/docusign-utils";
 import { createClient } from "@/utils/supabase/server";
 const { ApiClient, EnvelopesApi } = require("docusign-esign");
-
+const defaultUrl = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const DOCUSIGN_API_BASE_PATH = process.env.DOCUSIGN_API_BASE_PATH;
 const DOCUSIGN_ACCOUNT_ID = process.env.DOCUSIGN_ACCOUNT_ID;
 const DOCUSIGN_SIGNER_NAME = process.env.DOCUSIGN_SIGNER_NAME;
@@ -40,7 +42,7 @@ async function getEmbeddedSigningUrl(
   const envelopesApi = new EnvelopesApi(apiClient);
 
   const viewRequest = {
-    returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/payment?${envelopeId}`, // URL to redirect after signing
+    returnUrl: `${defaultUrl}/payment?${envelopeId}`, // URL to redirect after signing
     authenticationMethod: "none",
     email: recipientEmail,
     userName: DOCUSIGN_SIGNER_NAME,
@@ -88,6 +90,7 @@ export async function POST(request: Request) {
       mergedPdfBytes as Buffer
     );
 
+    console.log(user?.email, "user?.email");
     const signingUrl = await getEmbeddedSigningUrl(
       envelopeId,
       user?.email as string

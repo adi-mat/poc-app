@@ -71,21 +71,22 @@ export const updateSession = async (request: NextRequest) => {
       .single();
 
     // Define protected routes
-    const protectedRoutes = ["/dashboard", "/mydocuments", "/payment"];
-    if (
-      protectedRoutes.some((route) =>
-        request.nextUrl.pathname.startsWith(route)
-      )
-    ) {
-      // If no user is logged in, redirect to the login page
-      if (!user) {
-        return NextResponse.redirect(new URL("/login", request.url));
-      } else if (user && !data?.registration_complete) {
-        return NextResponse.redirect(new URL("/register", request.url));
-      }
+    // const protectedRoutes = ["/dashboard", "/mydocuments", "/payment"];
+    // if (
+    //   protectedRoutes.some((route) =>
+    //     request.nextUrl.pathname.startsWith(route)
+    //   )
+    // ) {
+    //   console.log(user, "user logged in?");
+    //   // If no user is logged in, redirect to the login page
+    //   if (!user) {
+    //     return NextResponse.redirect(new URL("/login", request.url));
+    //   } else if (user && !data?.registration_complete) {
+    //     return NextResponse.redirect(new URL("/register", request.url));
+    //   }
 
-      return response;
-    }
+    //   return response;
+    // }
   } catch (e) {
     // If you are here, a Supabase client could not be created!
     // This is likely because you have not set up environment variables.
